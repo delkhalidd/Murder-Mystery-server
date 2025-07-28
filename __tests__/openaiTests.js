@@ -22,7 +22,7 @@ describe("question transformations", ()=>{
     }
 
     console.debug(log);
-  });
+  }, 3e5); // 30s timeout
 
   it("returns responses", ()=>{
     expect(transformed).toBeTruthy();
