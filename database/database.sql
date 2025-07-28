@@ -34,7 +34,7 @@ CREATE TABLE accepted_invites (
     created_at TIMESTAMP NOT NULL,
     case_id INT NOT NULL,
     user_id INT NOT NULL,
-    date_started DATE NOT NULL,
+    started_at TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (case_id) REFERENCES cases(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
