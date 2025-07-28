@@ -1,5 +1,10 @@
 const {Router} = require("express");
 
-const router = Router();
+const userController = require('../controller/UserController.js')
 
-module.exports = router;
+const userRouter = Router();    // changed from router to userRouter incase merge clashses
+
+userRouter.post("/register", userController.register);
+userRouter.post("/login", userController.login);
+
+module.exports = userRouter;
