@@ -3,7 +3,7 @@ const User = require("../model/User");
 
 const authMiddleware = (authRequired) => {
   return async (req, res, next) => {
-    const auth = req.header["Authorization"];
+    const auth = req.headers["authorization"];
     if(!auth){
       if(!authRequired) return next();
       return res.status(401).send({

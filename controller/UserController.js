@@ -54,7 +54,12 @@ async function login(req, res) {
     }
 }
 
+const me = (req, res) => {
+  return res.json(req.user);
+}
+
 module.exports = {
     register,
-    login
+    login,
+    me
 };
