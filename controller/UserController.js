@@ -54,3 +54,8 @@ async function login(req, res) {
       res.status(401).json({ error: err.message });
     }
 }
+
+module.exports = {
+    register,
+    login
+};
