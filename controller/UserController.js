@@ -31,8 +31,7 @@ async function login(req, res) {
         const match = await user.comparePassword(data.password);
 
         if (match) {
-
-            const payload = { username: user.username }
+            const payload = { id: user.id }
 
             const sendToken = (err, token) => {
                 if (err) {
