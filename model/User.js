@@ -1,11 +1,16 @@
+const e = require('express');
 const db = require('../database/connect');
 
 class User {
 
-    constructor({ id, username, password }) {
+    constructor({ id, firstname, surnames, username, email, password, account_type }) {
         this.id = id;
+        this.firstname = firstname;
+        this.surnames = surnames;
         this.username = username;
+        this.email = email;
         this.password = password;
+        this.account_type = account_type;
     }
 
     static async getOneById(id) {
@@ -25,8 +30,8 @@ class User {
     }
 
     static async create(data) {
-        const { username, password } = data;
-        let response = await db.query("INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id;", [username, password]);
+        const { firstname, surnames, username, email, password, account_type } = data;
+        let response = await db.query("INSERT INTO users (firstname, surnames, username, email, password, account_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;", [firstname, surnames, username, email, password, account_type]);
         const newId = response.rows[0].id;
         const newUser = await User.getOneById(newId);
         return newUser;
