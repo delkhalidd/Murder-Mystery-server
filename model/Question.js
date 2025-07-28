@@ -42,6 +42,10 @@ class Question{
   static async destroyByCase(cid){
     return db.query("DELETE FROM questions WHERE case_id = $1", [cid]);
   }
+
+  async destroy(){
+    return db.query("DELETE FROM questions WHERE id = $1", [this.id]);
+  }
 }
 
 module.exports = Question;
