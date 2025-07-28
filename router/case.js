@@ -1,20 +1,17 @@
 const {Router} = require("express");
-const Case = require("../model/Case");
 const CaseController = require("../controller/CaseController");
 const caseMiddleware = require("../middleware/case");
+const authMiddleware = require("../middleware/auth");
 
 const router = Router();
 
-// TODO: authenticate routes
-// router.use();
+router.post("/", authMiddleware(true), CaseController.create);
 
-router.post("/", CaseController.create);
+router.get("/:id", authMiddleware(true), caseMiddleware, CaseController.get);
 
-router.get("/:id", caseMiddleware, CaseController.get);
+router.get("/:id/questions", authMiddleware(true), caseMiddleware, CaseController.getQuestions);
+router.post("/:id/questions", authMiddleware(true), caseMiddleware, CaseController.createQuestions);
 
-router.get("/:id/questions", caseMiddleware, CaseController.getQuestions);
-router.post("/:id/questions", caseMiddleware, CaseController.createQuestions);
-
-router.get("/:id/questions/status", caseMiddleware, CaseController.getTransformationStatus);
+router.get("/:id/questions/status", authMiddleware(true), caseMiddleware, CaseController.getTransformationStatus);
 
 module.exports = router;

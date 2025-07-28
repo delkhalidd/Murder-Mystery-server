@@ -2,6 +2,7 @@ const Case = require("../model/Case");
 const Question = require("../model/Question");
 const TeacherInput = require("../model/TeacherInput");
 const {transformQuestionsAndGetBriefs} = require("../openai");
+const {AccountTypeTeacher} = require("../database/const");
 const transformationStatusMap = new Map();
 
 const get = (req, res) => {
@@ -9,20 +10,22 @@ const get = (req, res) => {
 }
 
 const create = async (req, res) => {
-    // TODO: limit routes to teachers only
+  if(req.user.account_type !== AccountTypeTeacher) return res.status(403).json({
+    message: "Forbidden"
+  });
 
-    const payload = {
-      ...req.body,
-      user_id: 1 // req.user.id
-    }
-    try{
-      const c = await Case.create(payload);
-      return res.status(201).json(c);
-    }catch(e){
-      return res.status(400).json({
-        message: e.message
-      });
-    }
+  const payload = {
+    ...req.body,
+    user_id: req.user.id
+  }
+  try{
+    const c = await Case.create(payload);
+    return res.status(201).json(c);
+  }catch(e){
+    return res.status(400).json({
+      message: e.message
+    });
+  }
 }
 
 const mapInputsOntoQuestions = async (req, questions) => {
@@ -47,7 +50,6 @@ const getQuestions = async (req, res) => {
 }
 
 const _getTransformationStatus = async (req) => {
-  // TODO: limit to teacher
   if(transformationStatusMap.has(req.case.id)) return transformationStatusMap.get(req.case.id);
 
   const questions = await Question.getByCase(req.case.id);
@@ -62,11 +64,19 @@ const _getTransformationStatus = async (req) => {
 }
 
 const getTransformationStatus = async (req, res) => {
+  if(req.user.account_type !== AccountTypeTeacher
+    || req.case.created_by !== req.user.id) return res.status(403).json({
+    message: "Forbidden"
+  });
   const status = await _getTransformationStatus(req);
   return res.status(status.status === "ERRORED" ? 500 : 200).json(status);
 }
 
 const createQuestions = async (req, res) => {
+  if(req.user.account_type !== AccountTypeTeacher
+    || req.case.created_by !== req.user.id) return res.status(403).json({
+    message: "Forbidden"
+  });
   const status = await _getTransformationStatus(req);
   if (status.status === "PROCESSING") return res.status(409).json({
     message: "Already processing"
