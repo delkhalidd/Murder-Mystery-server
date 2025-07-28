@@ -102,7 +102,7 @@ const transformQuestionsAndGetBriefs = async (questions) => {
           return {
             type: "function_call_output",
             call_id: o.call_id,
-            output: article,
+            output: article || "NO CONTENT",
             callIndex: i,
           }
       }
@@ -123,5 +123,5 @@ const transformQuestionsAndGetBriefs = async (questions) => {
 }
 
 module.exports = {
-  transformQuestions: transformQuestionsAndGetBriefs
+  transformQuestionsAndGetBriefs
 }

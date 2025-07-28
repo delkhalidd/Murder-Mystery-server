@@ -3,6 +3,12 @@ const { parse } = require("node-html-parser");
 
 const cache = new Map();
 
+/**
+ * searchWikipedia searches for an article named title and returns its summary (first paragraph before header)
+ * caches results in memory to avoid excessive scraping
+ * @param title article name to search for
+ * @returns {Promise<string>}
+ */
 const searchWikipedia = async (title) => {
   const key = title.toLowerCase();
   if(cache.has(key)) return cache.get(cache);
@@ -36,7 +42,7 @@ const searchWikipedia = async (title) => {
   }
 
   // remove citations[1] like this [a][23]
-  summary = (summary || "NO CONTENT").trim().replaceAll(/\[(\d+|\w)\]/gm, "");
+  summary = summary.trim().replaceAll(/\[(\d+|\w)\]/gm, "") || "NO CONTENT";
 
   cache.set(key, summary);
   return summary;
