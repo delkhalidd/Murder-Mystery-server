@@ -84,12 +84,14 @@ const createQuestions = async (req, res) => {
   const inputs = [];
   for(const input of req.body){
     try{
+      if(!input.body || !input.answer) throw new Error("question must have body and answer");
       inputs.push(await TeacherInput.create({
         ...input,
         case_id: req.case.id
       }));
     }catch(e){
       res.status(400).json({
+        status: "ERRORED",
         message: e.message
       });
       await TeacherInput.destroyByCase(req.case.id);
