@@ -6,5 +6,6 @@ const userRouter = Router();    // changed from router to userRouter incase merg
 
 userRouter.post("/register", userController.register);
 userRouter.post("/login", userController.login);
+userRouter.get("/", userController.login);
 
 module.exports = userRouter;
