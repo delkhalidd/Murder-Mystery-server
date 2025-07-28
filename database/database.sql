@@ -1,10 +1,10 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS cases;
-DROP TABLE IF EXISTS accepted_invites;
-DROP TABLE IF EXISTS briefs;
-DROP TABLE IF EXISTS teacher_input;
-DROP TABLE IF EXISTS questions;
 DROP TABLE IF EXISTS answers;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS teacher_input;
+DROP TABLE IF EXISTS briefs;
+DROP TABLE IF EXISTS accepted_invites;
+DROP TABLE IF EXISTS cases;
+DROP TABLE IF EXISTS users;
 
 
 CREATE TABLE users (
@@ -21,12 +21,12 @@ CREATE TABLE users (
 CREATE TABLE cases (
     id INT GENERATED ALWAYS AS IDENTITY,
     date_created DATE NOT NULL,
-    created_by INT NOT NULL
+    created_by INT NOT NULL,
     title VARCHAR(50) NOT NULL,
     description TEXT,
-    invite_token VARCHAR(64) NOT NULL, 
+    invite_token VARCHAR(64) NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (created_by) REFERENCES users(id) 
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 CREATE TABLE accepted_invites (
@@ -77,7 +77,7 @@ CREATE TABLE answers (
     answer TEXT NOT NULL,
     date_created DATE NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (case_id) REFERENCES cases(id)
+    FOREIGN KEY (case_id) REFERENCES cases(id),
     FOREIGN KEY (question_id) REFERENCES questions(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
