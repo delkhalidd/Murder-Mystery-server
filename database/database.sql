@@ -81,3 +81,11 @@ CREATE TABLE answers (
     FOREIGN KEY (question_id) REFERENCES questions(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- test users, john is a teacher, jane is a student. password test_user
+
+INSERT INTO users(firstname, surnames, username, email, password, account_type)
+VALUES ('John', 'Doe', 'john_doe', 'john@example.com', '$2a$10$PydrbiNDTPfJJPi.NxDNeOXIGWv2p5.uA76FCkvWogsjkTVFFZRra', 0);
+
+INSERT INTO users(firstname, surnames, username, email, password, account_type)
+VALUES ('Jane', 'Doe', 'jane_doe', 'jane@example.com', '$2a$10$PydrbiNDTPfJJPi.NxDNeOXIGWv2p5.uA76FCkvWogsjkTVFFZRra', 1);
