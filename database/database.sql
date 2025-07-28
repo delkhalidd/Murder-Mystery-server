@@ -8,25 +8,25 @@ DROP TABLE IF EXISTS users;
 
 
 CREATE TABLE users (
-    id INT GENERATED ALWAYS AS IDENTITY,
-    firstname VARCHAR(30) NOT NULL,
-    surnames VARCHAR(30) NOT NULL,
-    username VARCHAR(30) UNIQUE NOT NULL,
-    email VARCHAR(50) UNIQUE NOT NULL,
-    password CHAR(60) NOT NULL,
-    account_type INT NOT NULL,
-    PRIMARY KEY (id)
+   id INT GENERATED ALWAYS AS IDENTITY,
+   firstname VARCHAR(30) NOT NULL,
+   surnames VARCHAR(30) NOT NULL,
+   username VARCHAR(30) UNIQUE NOT NULL,
+   email VARCHAR(50) UNIQUE NOT NULL,
+   password CHAR(60) NOT NULL,
+   account_type INT NOT NULL,
+   PRIMARY KEY (id)
 );
 
 CREATE TABLE cases (
-    id INT GENERATED ALWAYS AS IDENTITY,
-    date_created DATE NOT NULL,
-    created_by INT NOT NULL,
-    title VARCHAR(50) NOT NULL,
-    description TEXT,
-    invite_token VARCHAR(64) NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (created_by) REFERENCES users(id)
+   id INT GENERATED ALWAYS AS IDENTITY,
+   date_created DATE NOT NULL,
+   created_by INT NOT NULL,
+   title VARCHAR(50) NOT NULL,
+   description TEXT,
+   invite_token VARCHAR(64) NOT NULL,
+   PRIMARY KEY (id),
+   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 CREATE TABLE accepted_invites (
