@@ -1,12 +1,12 @@
 require("dotenv").config();
 const {expect, it, describe, beforeAll} = require("@jest/globals");
-const {transformQuestions} = require("../openai");
+const {transformQuestionsAndGetBriefs} = require("../openai");
 const {questions} = require("./openaiConsts.json");
 
 describe("question transformations", ()=>{
   let brief, transformed;
   beforeAll(async () => {
-    [transformed, brief] = await transformQuestions(questions);
+    [transformed, brief] = await transformQuestionsAndGetBriefs(questions);
     let log = "";
 
     for(const b of brief){
