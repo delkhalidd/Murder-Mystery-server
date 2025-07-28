@@ -1,6 +1,7 @@
 const Case = require("../model/Case");
 const Question = require("../model/Question");
 const TeacherInput = require("../model/TeacherInput");
+const Brief = require("../model/Brief");
 const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher} = require("../database/const");
 const transformationStatusMap = new Map();
@@ -56,10 +57,14 @@ const _getTransformationStatus = async (req) => {
   if(questions.length === 0) return {
     status: "PENDING"
   };
+  const briefs = await Brief.getByCase(req.case.id);
 
   return {
     status: "COMPLETED",
-    result: await mapInputsOntoQuestions(req, questions)
+    result: {
+      questions: await mapInputsOntoQuestions(req, questions),
+      briefs
+    }
   };
 }
 
@@ -86,6 +91,7 @@ const createQuestions = async (req, res) => {
   });
 
   if(status.status === "COMPLETED"){
+    await Brief.destroyByCase(req.case.id);
     await Question.destroyByCase(req.case.id);
     await TeacherInput.destroyByCase(req.case.id);
     delete status.result;
@@ -124,13 +130,22 @@ const createQuestions = async (req, res) => {
         input_id: inputs[t.originalIndex].id
       });
     }
+    for(const b of briefs){
+      await Brief.create({
+        case_id: req.case.id,
+        body: b.body,
+        topic: b.topic
+      });
+    }
     transformationStatusMap.delete(req.case.id);
   }catch(e){
     status.status = "ERRORED";
     status.message = e.message;
     transformationStatusMap.set(req.case.id, status);
     console.error(e);
+    await Question.destroyByCase(req.case.id);
     await TeacherInput.destroyByCase(req.case.id);
+    await Brief.destroyByCase(req.case.id);
   }
 }
 
