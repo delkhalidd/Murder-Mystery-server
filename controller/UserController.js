@@ -24,19 +24,19 @@ async function login(req, res) {
     try {
         const user = await User.getOneByUsername(data.username);
 
-        if(!user) { 
-            throw new Error('No user with this username') 
+        if(!user) {
+            throw new Error('No user with this username')
         }
 
-        const match = await bcrypt.compare(data.password, user.password);
-  
+        const match = await user.comparePassword(data.password);
+
         if (match) {
 
             const payload = { username: user.username }
 
             const sendToken = (err, token) => {
-                if (err) { 
-                    throw new Error('Error in token generation') 
+                if (err) {
+                    throw new Error('Error in token generation')
                 }
                 res.status(200).json({
                     success: true,
@@ -47,9 +47,9 @@ async function login(req, res) {
         jwt.sign(payload, process.env.SECRET_TOKEN, { expiresIn: 7200 }, sendToken);
 
         } else {
-            throw new Error('User could not be authenticated')  
+            throw new Error('User could not be authenticated')
         }
-        
+
     } catch (err) {
       res.status(401).json({ error: err.message });
     }

@@ -1,15 +1,17 @@
 const e = require('express');
 const db = require('../database/connect');
+const bcrypt = require("bcrypt");
 
 class User {
+    #password;
 
     constructor({ id, firstname, surnames, username, email, password, account_type }) {
         this.id = id;
         this.firstname = firstname;
         this.surnames = surnames;
         this.username = username;
+        this.#password = password;
         this.email = email;
-        this.password = password;
         this.account_type = account_type;
     }
 
@@ -35,6 +37,10 @@ class User {
         const newId = response.rows[0].id;
         const newUser = await User.getOneById(newId);
         return newUser;
+    }
+
+    comparePassword(password){
+        return bcrypt.compare(password, this.#password);
     }
 }
 
