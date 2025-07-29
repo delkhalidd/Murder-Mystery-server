@@ -24,6 +24,10 @@ class Invite{
     return new Invite(res.rows[0]);
   }
 
+  static async destroyByCase(cid){
+    return db.query("DELETE FROM accepted_invites WHERE case_id = $1", [cid]);
+  }
+
   async start(){
     if(this.started_at !== null) throw new Error("invite already started");
     const res = await db.query("UPDATE accepted_invites SET started_at = $1 WHERE id = $2 RETURNING *",

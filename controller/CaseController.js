@@ -123,6 +123,7 @@ const deleteCase = async (req, res) => {
     await Question.destroyByCase(req.case.id);
     await TeacherInput.destroyByCase(req.case.id);
     await Brief.destroyByCase(req.case.id);
+    await Invite.destroyByCase(req.case.id);
     await req.case.destroy();
     return res.status(204).end();
   }catch(e){
