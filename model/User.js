@@ -1,6 +1,7 @@
 const e = require('express');
 const db = require('../database/connect');
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 class User {
     #password;
@@ -41,6 +42,12 @@ class User {
 
     comparePassword(password){
         return bcrypt.compare(password, this.#password);
+    }
+
+    async generateJwt(){
+        return jwt.sign({
+            id: this.id
+        }, process.env.SECRET_TOKEN, {expiresIn: 7200});
     }
 }
 

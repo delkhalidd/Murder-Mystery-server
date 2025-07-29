@@ -25,26 +25,16 @@ async function login(req, res) {
         const user = await User.getOneByUsername(data.username);
 
         if(!user) {
-            throw new Error('No user with this username')
+            throw new Error('User could not be authenticated')
         }
 
         const match = await user.comparePassword(data.password);
 
         if (match) {
-            const payload = { id: user.id }
-
-            const sendToken = (err, token) => {
-                if (err) {
-                    throw new Error('Error in token generation')
-                }
-                res.status(200).json({
-                    success: true,
-                    token: token
-                });
-        }
-
-        jwt.sign(payload, process.env.SECRET_TOKEN, { expiresIn: 7200 }, sendToken);
-
+            res.status(200).json({
+                success: true,
+                token: await user.generateJwt()
+            });
         } else {
             throw new Error('User could not be authenticated')
         }
