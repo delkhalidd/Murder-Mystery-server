@@ -103,6 +103,18 @@ const canEditCase = (req, res) => {
   return true;
 }
 
+const edit = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  try{
+    let _case = await req.case.modify(req.body);
+    return res.json(_case);
+  }catch(e){
+    return res.status(400).json({
+      message: e.message
+    });
+  }
+}
+
 const deleteCase = async (req, res) => {
   if(!canEditCase(req, res)) return;
   try{
@@ -218,7 +230,10 @@ const modifyQuestions = async (req, res) => {
         status: 404,
         message: "question not found"
       }
-      question = await question.modify(q.body || question.body, q.answer || question.answer);
+      question = await question.modify({
+        body: q.body || question.body,
+        answer: q.answer || question.answer
+      });
       return {
         status: 200,
         ...question,
@@ -251,7 +266,10 @@ const modifyBriefs = async (req, res) => {
         status: 404,
         message: "brief not found"
       }
-      brief = await brief.modify(b.topic || brief.topic, b.body || brief.body);
+      brief = await brief.modify({
+        topic: b.topic || brief.topic,
+        body: b.body || brief.body
+      });
       return {
         status: 200,
         ...brief,
@@ -268,7 +286,7 @@ const modifyBriefs = async (req, res) => {
 }
 
 module.exports = {
-  get, create,
+  get, create, edit, delete: deleteCase,
   getQuestions, getTransformationStatus, createQuestions,
-  modifyQuestions, modifyBriefs, delete: deleteCase
+  modifyQuestions, modifyBriefs
 }

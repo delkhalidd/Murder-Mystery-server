@@ -48,6 +48,14 @@ class Case {
   async destroy(){
     return db.query("DELETE FROM cases WHERE id = $1", [this.id]);
   }
+
+  async modify({title, description}){
+    const res = await db.query("UPDATE cases SET title = $1, description = $2 WHERE id = $3 RETURNING *", [
+      title, description, this.id
+    ]);
+    if(res.rows.length === 0) throw new Error("case update failed");
+    return new Case(res.rows[0]);
+  }
 }
 
 module.exports = Case
