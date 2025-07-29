@@ -1,0 +1,48 @@
+name: "murder-mystery-api"
+services:
+  mystery_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: "postgresql://postgres:${DB_PSWD:-password}@db:5432/mystery_db?pool_mode=transaction"
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    env_file:
+      # this noinspection doesnt even work, i will be forever cursed by scary red line even though it's valid syntax :(
+      # noinspection ComposeUnknownValues
+      - path: .env
+        required: false
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://mystery_api:3000/" ]
+      interval: 30s
+      start_interval: 2s
+      start_period: 10s
+      timeout: 5s
+      retries: 5
+    container_name: mystery_api
+    ports:
+      - "${PORT:-3000}:3000"
+  db:
+    image: postgres:17.5
+    container_name: mystery_db
+    environment:
+      POSTGRES_PASSWORD: "${DB_PSWD:-password}"
+      POSTGRES_DB: mystery_db
+      PGDATA: /postgres-data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 30s
+      start_interval: 2s
+      start_period: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - murder-mystery-data:/postgres-data
+
+volumes:
+  murder-mystery-data:
