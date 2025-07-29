@@ -13,7 +13,10 @@ async function register(req, res) {
         //console.log(data);
         const result = await User.create(data)
 
-        res.status(201).send(result);
+        res.status(201).send({
+            user: result,
+            token: await result.generateJwt()
+        });
     } catch (err) {
         res.status(400).json({ error: err.message })
     }
@@ -33,7 +36,8 @@ async function login(req, res) {
         if (match) {
             res.status(200).json({
                 success: true,
-                token: await user.generateJwt()
+                token: await user.generateJwt(),
+                user
             });
         } else {
             throw new Error('User could not be authenticated')
