@@ -44,7 +44,7 @@ services:
     volumes:
       - murder-mystery-data:/postgres-data
 #    ports:
-#      - "${PORT:-5432}:5432" # only uncomment for dev
+#      - "${DB_PORT:-5432}:5432" # only uncomment for dev
 
 volumes:
   murder-mystery-data:
