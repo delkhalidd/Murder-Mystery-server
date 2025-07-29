@@ -29,7 +29,7 @@ describe("user account routes",  () => {
         account_type: 0
       })
       .set("Content-Type", "application/json")
-      .then(r=>r.body);
+      .then(r=>r.body.user);
     expect(newUser.id).toBeDefined();
   });
 
