@@ -10,9 +10,8 @@ class TeacherInput{
   }
 
   static async create({body, answer, case_id}){
-    const c = await Case.getById(case_id);
     const res = await db.query("INSERT INTO teacher_input(case_id, body, answer) VALUES ($1, $2, $3) RETURNING *",
-      [c.id, body, answer]
+      [case_id, body, answer]
     );
     if(res.rows.length === 0) throw new Error("couldn't create input");
 

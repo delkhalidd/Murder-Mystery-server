@@ -12,10 +12,8 @@ class Question{
   }
 
   static async create({body, answer, case_id, input_id}){
-    const c = await Case.getById(case_id);
-    const t = await TeacherInput.getById(input_id);
     const res = await db.query("INSERT INTO questions(input_id, body, answer, case_id) VALUES ($1, $2, $3, $4) RETURNING *",
-      [t.id, body, answer, c.id]
+      [input_id, body, answer, case_id]
     );
     if(res.rows.length === 0) throw new Error("couldn't create question");
 

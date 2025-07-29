@@ -10,9 +10,8 @@ class Brief{
   }
 
   static async create({body, topic, case_id}){
-    const c = await Case.getById(case_id);
     const res = await db.query("INSERT INTO briefs(case_id, body, topic) VALUES ($1, $2, $3) RETURNING *",
-      [c.id, body, topic]
+      [case_id, body, topic]
     );
     if(res.rows.length === 0) throw new Error("couldn't create brief");
 
