@@ -103,6 +103,18 @@ const canEditCase = (req, res) => {
   return true;
 }
 
+const edit = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  try{
+    let _case = await req.case.modify(req.body);
+    return res.json(_case);
+  }catch(e){
+    return res.status(400).json({
+      message: e.message
+    });
+  }
+}
+
 const deleteCase = async (req, res) => {
   if(!canEditCase(req, res)) return;
   try{
@@ -268,7 +280,7 @@ const modifyBriefs = async (req, res) => {
 }
 
 module.exports = {
-  get, create,
+  get, create, edit, delete: deleteCase,
   getQuestions, getTransformationStatus, createQuestions,
-  modifyQuestions, modifyBriefs, delete: deleteCase
+  modifyQuestions, modifyBriefs
 }
