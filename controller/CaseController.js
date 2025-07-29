@@ -3,11 +3,26 @@ const Question = require("../model/Question");
 const TeacherInput = require("../model/TeacherInput");
 const Brief = require("../model/Brief");
 const {transformQuestionsAndGetBriefs} = require("../openai");
-const {AccountTypeTeacher} = require("../database/const");
+const {AccountTypeTeacher, AccountTypeStudent} = require("../database/const");
 const transformationStatusMap = new Map();
 
-const get = (req, res) => {
-  return res.json(req.case);
+const get = async (req, res) => {
+  const questions = await Question.getByCase(req.case.id);
+  const withInputs = await mapInputsOntoQuestions(req, questions);
+  const briefs = await Brief.getByCase(req.case.id);
+  return res.json({
+    ...req.case,
+    questions: withInputs.map(q=>{
+      if(req.user.account_type === AccountTypeStudent){
+        delete q.answer;
+        delete q.input_id;
+        delete q.original;
+      }
+      delete q.case_id;
+      return q;
+    }),
+    briefs,
+  });
 }
 
 const create = async (req, res) => {
