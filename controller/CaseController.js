@@ -4,13 +4,14 @@ const TeacherInput = require("../model/TeacherInput");
 const Brief = require("../model/Brief");
 const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher, AccountTypeStudent} = require("../database/const");
+const Invite = require("../model/Invite");
 const transformationStatusMap = new Map();
 
 const get = async (req, res) => {
   const questions = await Question.getByCase(req.case.id);
   const withInputs = await mapInputsOntoQuestions(req, questions);
   const briefs = await Brief.getByCase(req.case.id);
-  return res.json({
+  let json = {
     ...req.case,
     questions: withInputs.map(q=>{
       if(req.user.account_type === AccountTypeStudent){
@@ -22,7 +23,12 @@ const get = async (req, res) => {
       return q;
     }),
     briefs,
-  });
+  };
+
+  if(req.user.account_type === AccountTypeStudent){
+    json.started_at = req.invite.started_at;
+  }
+  return res.json(json);
 }
 
 const create = async (req, res) => {
@@ -83,24 +89,20 @@ const _getTransformationStatus = async (req) => {
   };
 }
 
-const getTransformationStatus = async (req, res) => {
-  if(req.user.account_type !== AccountTypeTeacher
-    || req.case.created_by !== req.user.id) return res.status(403).json({
-    message: "Forbidden"
-  });
-  const status = await _getTransformationStatus(req);
-  return res.status(status.status === "ERRORED" ? 500 : 200).json(status);
-}
-
 const canEditCase = (req, res) => {
-  if(req.user.account_type !== AccountTypeTeacher
-    || req.case.created_by !== req.user.id) {
+  if(req.case.created_by !== req.user.id) {
     res.status(403).json({
       message: "Forbidden"
     });
     return false;
   }
   return true;
+}
+
+const getTransformationStatus = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  const status = await _getTransformationStatus(req);
+  return res.status(status.status === "ERRORED" ? 500 : 200).json(status);
 }
 
 const edit = async (req, res) => {
@@ -285,8 +287,60 @@ const modifyBriefs = async (req, res) => {
   return resolveMultiStatus(req, res, results);
 }
 
+const getByInvite = async (req, res) => {
+  return res.json(req.case);
+}
+
+const acceptInvite = async (req, res) => {
+  if(req.user.account_type !== AccountTypeStudent) return res.status(403).send({
+    message: "invites can only be accepted by students"
+  });
+  if(await Invite.getByCaseUser(req.case.id, req.user.id).catch(e=>null) !== null) return res.status(409).json({
+    message: "Invite already accepted"
+  });
+  const invite = await Invite.create({
+    case_id: req.case.id,
+    user_id: req.user.id
+  });
+
+  const questions = await Question.getByCase(req.case.id);
+  const briefs = await Brief.getByCase(req.case.id);
+  return res.json({
+    ...req.case,
+    questions: questions.map(q=>{
+      delete q.input_id;
+      return q;
+    }),
+    briefs
+  });
+}
+
+const startCase = async (req, res) => {
+  if(req.user.account_type !== AccountTypeStudent)  return res.status(403).json({
+    message: "cases can only be started by students"
+  });
+  if(req.invite.started_at !== null) return res.status(409).json({
+    message: "case already started!"
+  });
+
+  req.invite = await req.invite.start();
+  const questions = await Question.getByCase(req.case.id);
+  const briefs = await Brief.getByCase(req.case.id);
+  return res.json({
+    ...req.case,
+    questions: questions.map(q=>{
+      delete q.input_id;
+      delete q.answer;
+      return q;
+    }),
+    briefs,
+    started_at: req.invite.started_at
+  });
+}
+
 module.exports = {
   get, create, edit, delete: deleteCase,
   getQuestions, getTransformationStatus, createQuestions,
-  modifyQuestions, modifyBriefs
+  modifyQuestions, modifyBriefs,
+  getByInvite, acceptInvite, startCase
 }
