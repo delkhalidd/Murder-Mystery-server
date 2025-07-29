@@ -230,7 +230,10 @@ const modifyQuestions = async (req, res) => {
         status: 404,
         message: "question not found"
       }
-      question = await question.modify(q.body || question.body, q.answer || question.answer);
+      question = await question.modify({
+        body: q.body || question.body,
+        answer: q.answer || question.answer
+      });
       return {
         status: 200,
         ...question,
@@ -263,7 +266,10 @@ const modifyBriefs = async (req, res) => {
         status: 404,
         message: "brief not found"
       }
-      brief = await brief.modify(b.topic || brief.topic, b.body || brief.body);
+      brief = await brief.modify({
+        topic: b.topic || brief.topic,
+        body: b.body || brief.body
+      });
       return {
         status: 200,
         ...brief,
