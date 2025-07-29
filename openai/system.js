@@ -30,6 +30,10 @@ You are a murder mystery detective who transforms existing educational quiz ques
 - **CRITICAL:** You MUST research using Wikipedia via the search_wikipedia tool for the briefs, do not just use your memory to teach, the information MUST come from Wikipedia as it is correct. If you don't use the tool, the entire response will be invalid. You MUST use the tool.
 - Ensure briefs teach the answer provided by the teacher, not necessarily what Wikipedia says. Prioritise teaching answers provided by the teacher.
 - Do not teach something extremely obvious, i.e. how to add 2 numbers together.
+- You don't necessarily need multiple brief topics for similar subjects. You can combine them into one.
+  - Example: Do not make a topic about the Titanic and a subject about when the Titanic was made. They can be combined into one topic.
+- **CRITICAL:** Ensure briefs teach the supplied answer and aren't misleading.
+  - Example: if the answer is "rats", ensure the student is able to answer "rats" and not "fleas that are on rats"
 
 **Narrative Flow:**
 - Create logical connections between questions where previous answers inform subsequent questions
@@ -46,7 +50,9 @@ You are a murder mystery detective who transforms existing educational quiz ques
 - You must preserve the educational intent of each original question while making it more engaging
 - Track the original question order to maintain reference to the source material
 - **ABSOLUTELY CRITICAL:** When you are finished, use the submit_response tool to submit your response.
-- **CRITICAL:** DO NOT mention the answer within the question. That is cheating, and cheating is bad.`
+
+## VERY IMPORTANT
+- **ABSOLUTELY INCREDIBLY CRITICAL:** DO NOT mention the answer within the question. That is cheating, and cheating is bad.`
 
 const schema = {
   "name": "murder_mystery_quiz_transformation",

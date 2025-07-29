@@ -40,6 +40,10 @@ class TeacherInput{
       answer: this.answer,
     }
   }
+
+  async destroy(){
+    return db.query("DELETE FROM teacher_input WHERE id = $1", [this.id]);
+  }
 }
 
 module.exports = TeacherInput

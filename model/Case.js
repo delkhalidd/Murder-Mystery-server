@@ -45,7 +45,9 @@ class Case {
     return new Case(res.rows[0]);
   }
 
-
+  async destroy(){
+    return db.query("DELETE FROM cases WHERE id = $1", [this.id]);
+  }
 }
 
 module.exports = Case

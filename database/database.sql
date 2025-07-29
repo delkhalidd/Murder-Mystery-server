@@ -44,6 +44,7 @@ CREATE TABLE briefs (
     id INT GENERATED ALWAYS AS IDENTITY,
     case_id INT NOT NULL,
     body TEXT NOT NULL,
+    topic TEXT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (case_id) REFERENCES cases(id)
 );
