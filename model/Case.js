@@ -46,7 +46,7 @@ class Case {
   }
 
   static async getByCreator(uid){
-    return db.query("SELECT * FROM cases WHERE created_by = $1", [uid])
+    return db.query("SELECT * FROM cases WHERE created_by = $1 ORDER BY id", [uid])
       .then(r=>r.rows.map(c => new Case(c)));
   }
 
