@@ -31,9 +31,9 @@ const create = async (req, res) => {
 
 const mapInputsOntoQuestions = async (req, questions) => {
   const inputs = await TeacherInput.getByCase(req.case.id) // inputs indexed by input ID
-    .then(r=>r.reduce((cur, prev) => {
-      cur[prev.id] = prev;
-      return cur;
+    .then(r=>r.reduce((prev, cur) => {
+      prev[cur.id] = cur;
+      return prev;
     }, {}));
 
   return questions.map(q=>{
