@@ -62,7 +62,7 @@ const mapInputsOntoQuestions = async (req, questions) => {
 const getQuestions = async (req, res) => {
   const questions = await Question.getByCase(req.case.id);
 
-  return res.send(await mapInputsOntoQuestions(req, questions)); // send original input alongside questions
+  return res.json(await mapInputsOntoQuestions(req, questions)); // send original input alongside questions
 }
 
 const _getTransformationStatus = async (req) => {
