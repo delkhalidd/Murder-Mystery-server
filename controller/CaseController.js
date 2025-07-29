@@ -77,11 +77,19 @@ const getTransformationStatus = async (req, res) => {
   return res.status(status.status === "ERRORED" ? 500 : 200).json(status);
 }
 
-const createQuestions = async (req, res) => {
+const canEditCase = (req, res) => {
   if(req.user.account_type !== AccountTypeTeacher
-    || req.case.created_by !== req.user.id) return res.status(403).json({
-    message: "Forbidden"
-  });
+    || req.case.created_by !== req.user.id) {
+    res.status(403).json({
+      message: "Forbidden"
+    });
+    return false;
+  }
+  return true;
+}
+
+const createQuestions = async (req, res) => {
+  if(!canEditCase(req, res)) return;
   const status = await _getTransformationStatus(req);
   if (status.status === "PROCESSING") return res.status(409).json({
     message: "Already processing"
@@ -149,7 +157,56 @@ const createQuestions = async (req, res) => {
   }
 }
 
+const modifyQuestions = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  if(!Array.isArray(req.body) || req.body.length === 0) return res.status(400).json({
+    message: "body must be array of modified questions"
+  });
+
+  const questions = await Question.getByCase(req.case.id).then(r=>r.reduce((prev, cur) => {
+    prev[cur.id] = cur;
+    return prev;
+  }, {})); // indexed by id
+  const results = await Promise.all(req.body.map(async q => {
+    try{
+      let question = questions[q.id];
+      if(!question) return {
+        status: 404,
+        message: "question not found"
+      }
+      question = await question.modify(q.body || question.body, q.answer || question.answer);
+      return {
+        status: 200,
+        ...question,
+      }
+    }catch(e){
+      return {
+        status: 400,
+        message: e.message
+      }
+    }
+  }));
+
+  let status = results[0].status;
+  for(const res of results.slice(1)){
+    if(res.status !== status){
+      status = 207;
+    }
+  }
+  if(status !== 207) return res.status(status).json(results.map(r=>{
+    delete r.status;
+    return r;
+  }));
+  return res.status(207).json(results);
+}
+
+const modifyBriefs = (req, res) => {
+  if(!canEditCase(req, res)) return;
+
+}
+
 module.exports = {
   get, create,
-  getQuestions, getTransformationStatus, createQuestions
+  getQuestions, getTransformationStatus, createQuestions,
+  modifyQuestions, modifyBriefs
 }

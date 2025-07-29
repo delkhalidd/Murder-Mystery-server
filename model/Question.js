@@ -46,6 +46,14 @@ class Question{
   async destroy(){
     return db.query("DELETE FROM questions WHERE id = $1", [this.id]);
   }
+
+  async modify(body, answer){
+    const res = await db.query("UPDATE questions SET body = $1, answer = $2 WHERE id = $3 RETURNING *", [
+      body, answer, this.id
+    ]);
+    if(res.rows.length === 0) throw new Error("question update failed");
+    return new Question(res.rows[0]);
+  }
 }
 
 module.exports = Question;
