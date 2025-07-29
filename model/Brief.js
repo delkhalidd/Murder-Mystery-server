@@ -26,7 +26,7 @@ class Brief{
   }
 
   static async getByCase(cid){
-    return db.query("SELECT * FROM briefs WHERE case_id = $1", [cid])
+    return db.query("SELECT * FROM briefs WHERE case_id = $1 ORDER BY id", [cid])
       .then(r=>r.rows.map(t=>new Brief(t)));
   }
 

@@ -29,7 +29,7 @@ class Question{
   }
 
   static async getByCase(cid){
-    return db.query("SELECT * FROM questions WHERE case_id = $1", [cid])
+    return db.query("SELECT * FROM questions WHERE case_id = $1 ORDER BY id", [cid])
       .then(r=>r.rows.map(q=>new Question(q)));
   }
 
