@@ -32,6 +32,8 @@ You are a murder mystery detective who transforms existing educational quiz ques
 - Do not teach something extremely obvious, i.e. how to add 2 numbers together.
 - You don't necessarily need multiple brief topics for similar subjects. You can combine them into one.
   - Example: Do not make a topic about the Titanic and a subject about when the Titanic was made. They can be combined into one topic.
+- **CRITICAL:** Ensure briefs teach the supplied answer and aren't misleading.
+  - Example: if the answer is "rats", ensure the student is able to answer "rats" and not "fleas that are on rats"
 
 **Narrative Flow:**
 - Create logical connections between questions where previous answers inform subsequent questions
@@ -48,7 +50,9 @@ You are a murder mystery detective who transforms existing educational quiz ques
 - You must preserve the educational intent of each original question while making it more engaging
 - Track the original question order to maintain reference to the source material
 - **ABSOLUTELY CRITICAL:** When you are finished, use the submit_response tool to submit your response.
-- **CRITICAL:** DO NOT mention the answer within the question. That is cheating, and cheating is bad.`
+
+## VERY IMPORTANT
+- **ABSOLUTELY INCREDIBLY CRITICAL:** DO NOT mention the answer within the question. That is cheating, and cheating is bad.`
 
 const schema = {
   "name": "murder_mystery_quiz_transformation",
