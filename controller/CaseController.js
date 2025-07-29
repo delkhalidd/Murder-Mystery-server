@@ -172,6 +172,20 @@ const createQuestions = async (req, res) => {
   }
 }
 
+const resolveMultiStatus = (req, res, results) => {
+  let status = results[0].status;
+  for(const res of results.slice(1)){
+    if(res.status !== status){
+      status = 207;
+    }
+  }
+  if(status !== 207) return res.status(status).json(results.map(r=>{
+    delete r.status;
+    return r;
+  }));
+  return res.status(207).json(results);
+}
+
 const modifyQuestions = async (req, res) => {
   if(!canEditCase(req, res)) return;
   if(!Array.isArray(req.body) || req.body.length === 0) return res.status(400).json({
@@ -202,22 +216,40 @@ const modifyQuestions = async (req, res) => {
     }
   }));
 
-  let status = results[0].status;
-  for(const res of results.slice(1)){
-    if(res.status !== status){
-      status = 207;
-    }
-  }
-  if(status !== 207) return res.status(status).json(results.map(r=>{
-    delete r.status;
-    return r;
-  }));
-  return res.status(207).json(results);
+  return resolveMultiStatus(req, res, results);
 }
 
-const modifyBriefs = (req, res) => {
+const modifyBriefs = async (req, res) => {
   if(!canEditCase(req, res)) return;
+  if(!Array.isArray(req.body) || req.body.length === 0) return res.status(400).json({
+    message: "body must be array of modified briefs"
+  });
 
+  const briefs = await Brief.getByCase(req.case.id).then(r=>r.reduce((prev, cur) => {
+    prev[cur.id] = cur;
+    return prev;
+  }, {})); // indexed by id
+  const results = await Promise.all(req.body.map(async b => {
+    try{
+      let brief = briefs[b.id];
+      if(!brief) return {
+        status: 404,
+        message: "brief not found"
+      }
+      brief = await brief.modify(b.topic || brief.topic, b.body || brief.body);
+      return {
+        status: 200,
+        ...brief,
+      }
+    }catch(e){
+      return {
+        status: 400,
+        message: e.message
+      }
+    }
+  }));
+
+  return resolveMultiStatus(req, res, results);
 }
 
 module.exports = {

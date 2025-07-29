@@ -37,6 +37,14 @@ class Brief{
   async destroy(){
     return db.query("DELETE FROM briefs WHERE id = $1", [this.id]);
   }
+
+  async modify(topic, body){
+    const res = await db.query("UPDATE briefs SET body = $1, topic = $2 WHERE id = $3 RETURNING *", [
+      body, topic, this.id
+    ]);
+    if(res.rows.length === 0) throw new Error("brief update failed");
+    return new Brief(res.rows[0]);
+  }
 }
 
 module.exports = Brief;
