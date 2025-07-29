@@ -103,6 +103,21 @@ const canEditCase = (req, res) => {
   return true;
 }
 
+const deleteCase = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  try{
+    await Question.destroyByCase(req.case.id);
+    await TeacherInput.destroyByCase(req.case.id);
+    await Brief.destroyByCase(req.case.id);
+    await req.case.destroy();
+    return res.status(204).end();
+  }catch(e){
+    return res.status(500).json({
+      message: e.message
+    });
+  }
+}
+
 const createQuestions = async (req, res) => {
   if(!canEditCase(req, res)) return;
   const status = await _getTransformationStatus(req);
@@ -255,5 +270,5 @@ const modifyBriefs = async (req, res) => {
 module.exports = {
   get, create,
   getQuestions, getTransformationStatus, createQuestions,
-  modifyQuestions, modifyBriefs
+  modifyQuestions, modifyBriefs, delete: deleteCase
 }
