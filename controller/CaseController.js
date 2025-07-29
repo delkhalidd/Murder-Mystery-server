@@ -68,6 +68,13 @@ const mapInputsOntoQuestions = async (req, questions) => {
 const getQuestions = async (req, res) => {
   const questions = await Question.getByCase(req.case.id);
 
+  if(req.user.account_type === AccountTypeStudent){
+    return res.json(questions.map(q=>{
+      delete q.answer;
+      return q;
+    }));
+  }
+
   return res.json(await mapInputsOntoQuestions(req, questions)); // send original input alongside questions
 }
 
