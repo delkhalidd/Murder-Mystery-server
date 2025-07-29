@@ -1,18 +1,19 @@
 const db = require("../database/connect");
 
 class Answer {
-    constructor({id, case_id, question_id, user_id, correct, answer}){
+    constructor({id, case_id, question_id, user_id, correct, answer, created_at}){
         this.id = id;
         this.case_id = case_id;
         this.question_id = question_id;
         this.user_id = user_id;
         this.correct = correct;
         this.answer = answer;
+        this.created_at = created_at;
     }
 
     static async create({case_id, question_id, user_id, correct, answer}){                 // Not sure we need correct, as this is user input
-        const res = await db.query("INSERT INTO answers (case_id, question_id, user_id, correct, answer) VALUES ($1, $2) RETURNING *",
-            [case_id, question_id, user_id, correct, answer]
+        const res = await db.query("INSERT INTO answers (case_id, question_id, user_id, correct, answer, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [case_id, question_id, user_id, correct, answer, new Date()]
         );
     
         if(res.rows.length === 0) throw new Error("couldn't create answer");

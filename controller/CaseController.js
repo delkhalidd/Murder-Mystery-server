@@ -219,7 +219,7 @@ const createAnswers = async (req, res) => {
   if (!req.body || !req.body.answer) {
     return res.status(400).json({
       status: "ERRORED",
-      message: "Missing anser in request body"
+      message: "Missing answer in request body"
     });
   }
 
@@ -251,9 +251,10 @@ const createAnswers = async (req, res) => {
     return res.status(201).json(newAnswer);
 
   } catch (err) {
+    console.log(err);
     return res.status(500).json({
       status: "ERRORED",
-      message: "Failes to create answer"
+      message: "Failed to create answer"
     });
   }
 };
