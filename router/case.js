@@ -25,4 +25,6 @@ router.post("/invite/:token", authMiddleware(true), caseInviteMiddleware, CaseCo
 
 router.patch("/:id/start", authMiddleware(true), caseIdMiddleware, CaseController.startCase);
 
+router.post("/:id/questions/:qid", authMiddleware(true), caseIdMiddleware, CaseController.createAnswers);
+
 module.exports = router;
