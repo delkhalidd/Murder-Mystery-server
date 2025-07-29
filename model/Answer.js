@@ -1,7 +1,4 @@
-const db = require("../database/database.sql")
-const Case = require("./Case");
-const Question = require("./Question");
-const User = require("./User"); 
+const db = require("../database/connect");
 
 class Answer {
     constructor({id, case_id, question_id, user_id, correct, answer}){
