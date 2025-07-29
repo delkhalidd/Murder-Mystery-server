@@ -14,12 +14,9 @@ class Answer {
         this.created_at = created_at;
     }
 
-    static async create({case_id, question_id, user_id, correct, answer, created_at}){
-        const c = await Case.getById(case_id);
-        const q = await Question.getById(question_id);
-        const u = await User.getOneById(user_id);
-        const res = await db.query("INSERT INTO answers(case_id, question_id, user_id, correct, answer, created_at VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [c.id, q.id, u.id, correct, answer, created_at]
+    static async create({correct, answer}){                 // Not sure we need correct, as this is user input
+        const res = await db.query("INSERT INTO answers (correct, answer) VALUES ($1, $2) RETURNING *",
+            [correct, answer]
         );
     
         if(res.rows.length === 0) throw new Error("couldn't create answer");
@@ -27,4 +24,29 @@ class Answer {
         return new Answer(res.rows[0]);
     }
 
+    static async getById(aId) {
+        const res = await db.query("SELECT * FROM answers WHERE id = $1", [aId]);
+        if(res.rows.length === 0) throw new Error("answer not found");
+        return new Answer(res.rows[0]);
+    }
+
+    static async getByCase(cId) {
+        const res = await db.query("SELECT * FROM answers WHERE case_id = $1", [cId]);
+        if(res.rows.length === 0) throw new Error("no answers found for this case");
+        return res.rows.map(row => new Answer(row));
+    }
+
+    static async getByQuestion(qId) {
+        const res = await db.query("SELECT * FROM answers WHERE question_id = $1", [qId]);
+        if(res.rows.length === 0) throw new Error("no answers found for this question");
+        return res.rows.map(row => new Answer(row));
+    }
+
+    static async getByUser(uId) {
+        const res = await db.query("SELECT * FROM answers WHERE user_id = $1", [uId]);
+        if(res.rows.length === 0) throw new Error("no answers found for this user");
+        return res.rows.map(row => new Answer(row));
+    }
 }
+
+module.exports = Answer;
