@@ -14,4 +14,6 @@ router.post("/:id/questions", authMiddleware(true), caseMiddleware, CaseControll
 
 router.get("/:id/questions/status", authMiddleware(true), caseMiddleware, CaseController.getTransformationStatus);
 
+router.post("/:id/questions/:qid", authMiddleware(true), caseMiddleware, CaseController.createAnswers);
+
 module.exports = router;

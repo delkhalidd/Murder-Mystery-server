@@ -2,13 +2,16 @@ const Case = require("../model/Case");
 const Question = require("../model/Question");
 const TeacherInput = require("../model/TeacherInput");
 const Brief = require("../model/Brief");
+const Answer = require("../model/Answer");
 const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher} = require("../database/const");
 const transformationStatusMap = new Map();
 
+
 const get = (req, res) => {
   return res.json(req.case);
 }
+
 
 const create = async (req, res) => {
   if(req.user.account_type !== AccountTypeTeacher) return res.status(403).json({
@@ -149,7 +152,54 @@ const createQuestions = async (req, res) => {
   }
 }
 
+const createAnswers = async (req, res) => {
+  const questionId = req.params.qid
+  const caseId = req.params.id
+
+  if (!req.body || !req.body.answer) {
+    return res.status(400).json({
+      status: "ERRORED",
+      message: "Missing anser in request body"
+    });
+  }
+
+  try {
+    // retrieve question
+    const question = await Question.getById(questionId);
+
+    //Ensure question is part of this case
+    if (question.case_id != caseId) {
+      return res.status(403).json({
+        status: "ERRORED",
+        message: "Question does not belong to this case"
+      });
+    }
+
+    // compare student answer to question answer
+    const studentAnswer = req.body.answer.toLowerCase();
+    const correctAnswer = question.answer.toLowerCase();
+    const isCorrect = studentAnswer === correctAnswer;
+
+    const newAnswer = await Answer.create({
+      case_id: req.case.id,
+      question_id: question.id,
+      user_id: req.user.id,
+      correct: isCorrect,
+      answer: req.body.answer
+    });
+
+    return res.status(201).json(newAnswer);
+
+  } catch (err) {
+    return res.status(500).json({
+      status: "ERRORED",
+      message: "Failes to create answer"
+    });
+  }
+};
+
+
 module.exports = {
   get, create,
-  getQuestions, getTransformationStatus, createQuestions
+  getQuestions, getTransformationStatus, createQuestions, createAnswers
 }
