@@ -45,6 +45,11 @@ class Case {
     return new Case(res.rows[0]);
   }
 
+  static async getByCreator(uid){
+    return db.query("SELECT * FROM cases WHERE created_by = $1", [uid])
+      .then(r=>r.rows.map(c => new Case(c)));
+  }
+
   async destroy(){
     return db.query("DELETE FROM cases WHERE id = $1", [this.id]);
   }

@@ -6,6 +6,7 @@ const authMiddleware = require("../middleware/auth");
 const router = Router();
 
 router.post("/", authMiddleware(true), CaseController.create);
+router.get("/mine", authMiddleware(true), CaseController.getMine);
 
 router.get("/:id", authMiddleware(true), caseIdMiddleware, CaseController.get);
 router.patch("/:id", authMiddleware(true), caseIdMiddleware, CaseController.edit);

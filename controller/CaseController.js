@@ -346,9 +346,29 @@ const startCase = async (req, res) => {
   });
 }
 
+const getMine = async (req, res) => {
+  if(req.user.account_type === AccountTypeStudent){
+    // TODO: get cases by accepted invites
+  }else{
+    return res.json(await Case.getByCreator(req.user.id)
+      .then(cases=>Promise.all(cases.map(async c => {
+        const questions = await Question.getByCase(c.id);
+        const briefs = await Brief.getByCase(c.id);
+
+        return {
+          ...c,
+          questions,
+          briefs
+        }
+      })))
+    );
+  }
+}
+
 module.exports = {
   get, create, edit, delete: deleteCase,
   getQuestions, getTransformationStatus, createQuestions,
   modifyQuestions, modifyBriefs,
-  getByInvite, acceptInvite, startCase
+  getByInvite, acceptInvite, startCase,
+  getMine
 }
