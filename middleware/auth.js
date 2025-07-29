@@ -12,7 +12,7 @@ const authMiddleware = (authRequired) => {
     }
 
     try{
-      const decoded = jwt.decode(auth, process.env.SECRET_TOKEN);
+      const decoded = jwt.verify(auth, process.env.SECRET_TOKEN);
       req.user = await User.getOneById(decoded.id);
       return next();
     }catch(e){
