@@ -185,9 +185,21 @@ const createAnswers = async (req, res) => {
     }
 
     // Check that questions are being answered in order
+    const allCaseQuestions = await Question.getByCase(req.case.id);
+    const sortedQuestions = allCaseQuestions.sort((a, b) => a.id = b.id); 
+    const currentIndex = sortedQuestions.findIndex(q => q.id === question.id)
 
-    //const allCaseQuestions = await Question.getbyCase(req.case.id);
-    //const
+    if (currentIndex > 0 ) {   // if this isn't the first question
+      const previousQuestion = sortedQuestions[currentIndex - 1];
+      const prevAnswer = await Answer.getByUserAndQuestion(req.user.id, previousQuestion.id);
+
+      if(!prevAnswer) {       // if previous answer doesnt exist
+        return res.status(403).json({
+          status: "ERRORED",
+          message: "You must answer the previous question first"
+        });
+      }
+    }
 
     // compare student answer to question answer
     const studentAnswer = req.body.answer.toLowerCase();
