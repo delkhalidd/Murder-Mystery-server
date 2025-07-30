@@ -159,7 +159,7 @@ const createAnswers = async (req, res) => {
   if (!req.body || !req.body.answer) {
     return res.status(400).json({
       status: "ERRORED",
-      message: "Missing anser in request body"
+      message: "Missing answer in request body"
     });
   }
 
@@ -174,6 +174,20 @@ const createAnswers = async (req, res) => {
         message: "Question does not belong to this case"
       });
     }
+
+    // Check if question has already been answered by user
+    const existingAnswer = await Answer.getByUserAndQuestion(req.user.id, questionId);
+    if (existingAnswer) {
+      return res.status(409).json({
+        status: "ERRORED",
+        message: "You have already answered this question"
+      });
+    }
+
+    // Check that questions are being answered in order
+
+    //const allCaseQuestions = await Question.getbyCase(req.case.id);
+    //const
 
     // compare student answer to question answer
     const studentAnswer = req.body.answer.toLowerCase();
