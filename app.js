@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser')
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000', "https://poultry-logan-favorite-nt.trycloudflare.com"],
+  origin: ['http://localhost:3001', 'http://localhost:3000'],
   credentials: true,
 }));
 app.use(cookieParser());
