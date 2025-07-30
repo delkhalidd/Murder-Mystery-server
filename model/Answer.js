@@ -44,7 +44,8 @@ class Answer {
 
     static async getByUserAndQuestion(uId, qId) {
         const res = await db.query("SELECT * FROM answers WHERE user_id = $1 AND question_id = $2", [uId, qId]);
-        return res.rows.map(row => new Answer(row));
+        if(res.rows.length === 0) throw new Error("answer not found");
+        return new Answer(res.rows[0]);
     }
 }
 

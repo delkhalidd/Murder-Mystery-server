@@ -251,7 +251,7 @@ const createAnswers = async (req, res) => {
     }
 
     // Check if question has already been answered by user
-    const existingAnswer = await Answer.getByUserAndQuestion(req.user.id, questionId);
+    const existingAnswer = await Answer.getByUserAndQuestion(req.user.id, questionId).catch(e=>null);
     if (existingAnswer) {
       return res.status(409).json({
         message: "You have already answered this question"
@@ -264,7 +264,7 @@ const createAnswers = async (req, res) => {
 
     if (currentIndex > 0 ) {   // if this isn't the first question
       const previousQuestion = allCaseQuestions[currentIndex - 1];
-      const prevAnswer = await Answer.getByUserAndQuestion(req.user.id, previousQuestion.id);
+      const prevAnswer = await Answer.getByUserAndQuestion(req.user.id, previousQuestion.id).catch(e=>null);
 
       if(!prevAnswer) {       // if previous answer doesnt exist
         return res.status(403).json({
