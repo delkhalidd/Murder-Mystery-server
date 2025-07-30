@@ -3,6 +3,7 @@ const db = require("../database/connect");
 const Invite = require("./Invite");
 const Question = require("./Question");
 const Answer = require("./Answer");
+const User = require("./User");
 
 const caseNotFound = "case not found";
 
@@ -75,20 +76,23 @@ class Case {
     }, {})
     let questions = await Question.getByCase(this.id);
     const answersByQuestion = await Answer.getByCase(this.id).then(answers=>answers.reduce((prev, cur) => {
-      if(prev[cur.question_id]) prev[cur.question_id].append(cur);
+      if(prev[cur.question_id]) prev[cur.question_id].push(cur);
       else prev[cur.question_id] = [cur];
 
       return prev;
     }, {}));
     const ansIdxByUid = [];
-    const correctByUid = {};
+
+    const userHeatmap = {};
+    for(const i of started){
+      userHeatmap[i.user_id] = new Array(questions.length).fill(0);
+    }
 
     questions = questions.map((q, i)=>{
       const answers = answersByQuestion[q.id] || [];
       const curAnsIdxByUid = {};
       const inputs = {};
       const inputCounts = {};
-      let correct = 0;
 
       const timeTaken = answers.reduce((prev, cur, ai) => {
         curAnsIdxByUid[cur.user_id] = ai;
@@ -100,8 +104,7 @@ class Case {
         const inputKey = cur.answer.toLowerCase();
         if(!inputs[inputKey]) inputs[inputKey] = cur.answer;
         inputCounts[inputKey] = (inputCounts[inputKey] || 0) + 1;
-        if(cur.correct) correct++;
-        correctByUid[cur.user_id] = (correctByUid[cur.user_id] || 0) + (correct ? 1 : 0);
+        userHeatmap[cur.user_id][i] = cur.correct ? 1 : 0;
 
         return prev;
       }, []);
@@ -116,23 +119,24 @@ class Case {
             prev[cur[1]] = inputCounts[cur[0]];
             return prev;
           }, {}),
-          correct
         }
       }
     });
 
-    const studentPerformance = new Array(questions.length+1).fill(0);
-    for(let i = 0; i < questions.length+1; i++){
-      for(const correct of Object.values(correctByUid)){
-        if(correct === i) studentPerformance[i]++;
-      }
-    }
+    const performance = await Promise.all(Object.entries(userHeatmap).map(async ([uid, perf]) => {
+      const u = await User.getOneById(uid);
+
+      return [
+        u.firstname + " " + u.surnames,
+        perf
+      ]
+    }));
 
     return {
       questions,
       accepted_invites: invites.length,
       started_invites: started.length,
-      performance: studentPerformance
+      performance
     }
   }
 }
