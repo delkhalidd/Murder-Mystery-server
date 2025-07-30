@@ -1,5 +1,8 @@
 const crypto = require("crypto");
 const db = require("../database/connect");
+const Invite = require("./Invite");
+const Question = require("./Question");
+const Answer = require("./Answer");
 
 const caseNotFound = "case not found";
 
@@ -60,6 +63,77 @@ class Case {
     ]);
     if(res.rows.length === 0) throw new Error("case update failed");
     return new Case(res.rows[0]);
+  }
+
+  async analytics(){
+    const invites = await Invite.getByCase(this.id);
+
+    const started = invites.filter(i=>i.started_at !== null);
+    const startedIdxByUid = started.reduce((prev, cur, i) => {
+      prev[cur.user_id] = i;
+      return prev;
+    }, {})
+    let questions = await Question.getByCase(this.id);
+    const answersByQuestion = await Answer.getByCase(this.id).then(answers=>answers.reduce((prev, cur) => {
+      if(prev[cur.question_id]) prev[cur.question_id].append(cur);
+      else prev[cur.question_id] = [cur];
+
+      return prev;
+    }, {}));
+    const ansIdxByUid = [];
+    const correctByUid = {};
+
+    questions = questions.map((q, i)=>{
+      const answers = answersByQuestion[q.id] || [];
+      const curAnsIdxByUid = {};
+      const inputs = {};
+      const inputCounts = {};
+      let correct = 0;
+
+      const timeTaken = answers.reduce((prev, cur, ai) => {
+        curAnsIdxByUid[cur.user_id] = ai;
+        let delta = 0;
+        if(i === 0) delta = cur.created_at.getTime() - started[startedIdxByUid[cur.user_id]].started_at.getTime();
+        else delta = cur.created_at.getTime() - answersByQuestion[questions[i-1].id][ansIdxByUid[i-1][cur.user_id]].created_at.getTime();
+        prev.push(delta);
+
+        const inputKey = cur.answer.toLowerCase();
+        if(!inputs[inputKey]) inputs[inputKey] = cur.answer;
+        inputCounts[inputKey] = (inputCounts[inputKey] || 0) + 1;
+        if(cur.correct) correct++;
+        correctByUid[cur.user_id] = (correctByUid[cur.user_id] || 0) + (correct ? 1 : 0);
+
+        return prev;
+      }, []);
+
+      ansIdxByUid.push(curAnsIdxByUid);
+
+      return {
+        ...q,
+        analytics: {
+          time_taken: timeTaken,
+          answers: Object.entries(inputs).reduce((prev, cur) => {
+            prev[cur[1]] = inputCounts[cur[0]];
+            return prev;
+          }, {}),
+          correct
+        }
+      }
+    });
+
+    const studentPerformance = new Array(questions.length+1).fill(0);
+    for(let i = 0; i < questions.length+1; i++){
+      for(const correct of Object.values(correctByUid)){
+        if(correct === i) studentPerformance[i]++;
+      }
+    }
+
+    return {
+      questions,
+      accepted_invites: invites.length,
+      started_invites: started.length,
+      performance: studentPerformance
+    }
   }
 }
 

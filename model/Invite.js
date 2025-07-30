@@ -30,6 +30,11 @@ class Invite{
     return res.rows.map(i=>new Invite(i));
   }
 
+  static async getByCase(cid) {
+    const res = await db.query("SELECT * FROM accepted_invites WHERE case_id = $1 ORDER BY id DESC", [cid]);
+    return res.rows.map(i=>new Invite(i));
+  }
+
   static async destroyByCase(cid){
     return db.query("DELETE FROM accepted_invites WHERE case_id = $1", [cid]);
   }

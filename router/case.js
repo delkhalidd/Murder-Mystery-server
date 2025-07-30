@@ -20,6 +20,8 @@ router.get("/:id/questions/status", authMiddleware(true), caseIdMiddleware, Case
 
 router.patch("/:id/briefs", authMiddleware(true), caseIdMiddleware, CaseController.modifyBriefs);
 
+router.get("/:id/analytics", authMiddleware(true), caseIdMiddleware, CaseController.getAnalytics);
+
 router.get("/invite/:token", authMiddleware(true), caseInviteMiddleware, CaseController.getByInvite);
 router.post("/invite/:token", authMiddleware(true), caseInviteMiddleware, CaseController.acceptInvite);
 
