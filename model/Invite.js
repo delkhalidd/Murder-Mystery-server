@@ -18,10 +18,16 @@ class Invite{
     if(res.rows.length === 0) throw new Error("couldn't create accepted invite");
     return new Invite(res.rows[0]);
   }
+
   static async getByCaseUser(cid, uid){
     const res = await db.query("SELECT * FROM accepted_invites WHERE case_id = $1 AND user_id = $2", [cid, uid]);
     if(res.rows.length === 0) throw new Error("couldn't find invite");
     return new Invite(res.rows[0]);
+  }
+
+  static async getByUser(uid){
+    const res = await db.query("SELECT * FROM accepted_invites WHERE user_id = $1 ORDER BY id DESC", [uid]);
+    return res.rows.map(i=>new Invite(i));
   }
 
   static async destroyByCase(cid){

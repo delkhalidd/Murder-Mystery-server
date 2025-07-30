@@ -425,7 +425,14 @@ const startCase = async (req, res) => {
 
 const getMine = async (req, res) => {
   if(req.user.account_type === AccountTypeStudent){
-    // TODO: get cases by accepted invites
+    return res.json(await Invite.getByUser(req.user.id)
+      .then(invites=>Promise.all(invites.map(async i => {
+        return {
+          ...await Case.getById(i.case_id),
+          started_at: i.started_at,
+        }
+      })))
+    );
   }else{
     return res.json(await Case.getByCreator(req.user.id)
       .then(cases=>Promise.all(cases.map(async c => {
