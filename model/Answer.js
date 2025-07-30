@@ -49,7 +49,7 @@ class Answer {
     }
 
     static async destroyByCase(cid){
-        return db.query("DELETE FROM accepted_invites WHERE case_id = $1", [cid]);
+        return db.query("DELETE FROM answers WHERE case_id = $1", [cid]);
     }
 }
 
