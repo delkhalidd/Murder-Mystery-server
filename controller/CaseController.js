@@ -6,6 +6,7 @@ const Answer = require("../model/Answer");
 const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher} = require("../database/const");
 const transformationStatusMap = new Map();
+const { AccountTypeStudent } = require("../database/const");
 
 
 const get = (req, res) => {
@@ -155,6 +156,11 @@ const createQuestions = async (req, res) => {
 const createAnswers = async (req, res) => {
   const questionId = req.params.qid
   const caseId = req.params.id
+
+  // check student is logged in
+  if (req.user.account_type !== AccountTypeStudent) {
+    return res.status(403).json({ message: "Only students can submit answers"});
+  }
 
   if (!req.body || !req.body.answer) {
     return res.status(400).json({
