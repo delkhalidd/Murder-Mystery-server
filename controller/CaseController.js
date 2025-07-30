@@ -287,7 +287,10 @@ const createAnswers = async (req, res) => {
       answer: req.body.answer
     });
 
-    return res.status(201).json(newAnswer);
+    return res.status(201).json({
+      correct: isCorrect,
+      answer: question.answer
+    });
 
   } catch (err) {
     console.log(err);
