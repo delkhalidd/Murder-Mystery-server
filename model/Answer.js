@@ -43,6 +43,12 @@ class Answer {
         if(res.rows.length === 0) throw new Error("no answers found for this user");
         return res.rows.map(row => new Answer(row));
     }
+
+    static async getByUserAndQuestion(uId, qId) {
+        const res = await db.query("SELECT * FROM answers WHERE user_id = $1 AND question_id = $2", [uId, qId]);
+        if(res.rows.length === 0) throw new Error("no answers found for this question by this user");
+        return res.rows.map(row => new Answer(row));
+    }
 }
 
 module.exports = Answer;
