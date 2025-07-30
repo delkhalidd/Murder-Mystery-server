@@ -142,6 +142,7 @@ const edit = async (req, res) => {
 const deleteCase = async (req, res) => {
   if(!canEditCase(req, res)) return;
   try{
+    await Answer.destroyByCase(req.case.id);
     await Question.destroyByCase(req.case.id);
     await TeacherInput.destroyByCase(req.case.id);
     await Brief.destroyByCase(req.case.id);
