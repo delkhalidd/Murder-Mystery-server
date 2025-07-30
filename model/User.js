@@ -47,7 +47,7 @@ class User {
     async generateJwt(){
         return jwt.sign({
             id: this.id
-        }, process.env.SECRET_TOKEN, {expiresIn: 7200});
+        }, process.env.SECRET_TOKEN, {expiresIn: 60 * 60 * 24 * 30});
     }
 }
 
