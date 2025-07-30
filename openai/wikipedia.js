@@ -42,7 +42,7 @@ const searchWikipedia = async (title) => {
   }
 
   // remove citations[1] like this [a][23]
-  summary = summary.trim().replaceAll(/\[(\d+|\w)\]/gm, "") || "NO CONTENT";
+  summary = summary.trim().replaceAll(/\[(\d+|\w)]/gm, "") || "NO CONTENT";
 
   cache.set(key, summary);
   return summary;
