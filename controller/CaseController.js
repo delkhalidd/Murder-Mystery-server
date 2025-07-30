@@ -7,6 +7,7 @@ const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher, AccountTypeStudent} = require("../database/const");
 const Invite = require("../model/Invite");
 const transformationStatusMap = new Map();
+const { AccountTypeStudent } = require("../database/const");
 
 
 const get = async (req, res) => {
@@ -216,10 +217,14 @@ const createAnswers = async (req, res) => {
   const questionId = req.params.qid
   const caseId = req.params.id
 
+  // check student is logged in
+  if (req.user.account_type !== AccountTypeStudent) {
+    return res.status(403).json({ message: "Only students can submit answers"});
+  }
+
   if (!req.body || !req.body.answer) {
     return res.status(400).json({
-      status: "ERRORED",
-      message: "Missing answer in request body"
+      message: "Missing answwer in request body"
     });
   }
 
@@ -230,9 +235,31 @@ const createAnswers = async (req, res) => {
     //Ensure question is part of this case
     if (question.case_id != caseId) {
       return res.status(403).json({
-        status: "ERRORED",
         message: "Question does not belong to this case"
       });
+    }
+
+    // Check if question has already been answered by user
+    const existingAnswer = await Answer.getByUserAndQuestion(req.user.id, questionId);
+    if (existingAnswer) {
+      return res.status(409).json({
+        message: "You have already answered this question"
+      });
+    }
+
+    // Check that questions are being answered in order
+    const allCaseQuestions = await Question.getByCase(req.case.id);
+    const currentIndex = allCaseQuestions.findIndex(q => q.id === question.id)
+
+    if (currentIndex > 0 ) {   // if this isn't the first question
+      const previousQuestion = allCaseQuestions[currentIndex - 1];
+      const prevAnswer = await Answer.getByUserAndQuestion(req.user.id, previousQuestion.id);
+
+      if(!prevAnswer) {       // if previous answer doesnt exist
+        return res.status(403).json({
+          message: "You must answer the previous question first"
+        });
+      }
     }
 
     // compare student answer to question answer
@@ -253,7 +280,6 @@ const createAnswers = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({
-      status: "ERRORED",
       message: "Failed to create answer"
     });
   }
