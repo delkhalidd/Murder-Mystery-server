@@ -1,4 +1,3 @@
-const e = require('express');
 const db = require('../database/connect');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");

@@ -1,4 +1,3 @@
-const Case = require("./Case");
 const db = require("../database/connect");
 
 class Brief{

@@ -1,6 +1,4 @@
-const Case = require("./Case");
 const db = require("../database/connect");
-const TeacherInput = require("./TeacherInput");
 
 class Question{
   constructor({id, input_id, body, answer, case_id}){

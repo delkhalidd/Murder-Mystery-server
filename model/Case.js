@@ -1,5 +1,9 @@
 const crypto = require("crypto");
 const db = require("../database/connect");
+const Invite = require("./Invite");
+const Question = require("./Question");
+const Answer = require("./Answer");
+const User = require("./User");
 
 const caseNotFound = "case not found";
 
@@ -60,6 +64,80 @@ class Case {
     ]);
     if(res.rows.length === 0) throw new Error("case update failed");
     return new Case(res.rows[0]);
+  }
+
+  async analytics(){
+    const invites = await Invite.getByCase(this.id);
+
+    const started = invites.filter(i=>i.started_at !== null);
+    const startedIdxByUid = started.reduce((prev, cur, i) => {
+      prev[cur.user_id] = i;
+      return prev;
+    }, {})
+    let questions = await Question.getByCase(this.id);
+    const answersByQuestion = await Answer.getByCase(this.id).then(answers=>answers.reduce((prev, cur) => {
+      if(prev[cur.question_id]) prev[cur.question_id].push(cur);
+      else prev[cur.question_id] = [cur];
+
+      return prev;
+    }, {}));
+    const ansIdxByUid = [];
+
+    const userHeatmap = {};
+    for(const i of started){
+      userHeatmap[i.user_id] = new Array(questions.length).fill(0);
+    }
+
+    questions = questions.map((q, i)=>{
+      const answers = answersByQuestion[q.id] || [];
+      const curAnsIdxByUid = {};
+      const inputs = {};
+      const inputCounts = {};
+
+      const timeTaken = answers.reduce((prev, cur, ai) => {
+        curAnsIdxByUid[cur.user_id] = ai;
+        let delta = 0;
+        if(i === 0) delta = cur.created_at.getTime() - started[startedIdxByUid[cur.user_id]].started_at.getTime();
+        else delta = cur.created_at.getTime() - answersByQuestion[questions[i-1].id][ansIdxByUid[i-1][cur.user_id]].created_at.getTime();
+        prev.push(delta);
+
+        const inputKey = cur.answer.toLowerCase();
+        if(!inputs[inputKey]) inputs[inputKey] = cur.answer;
+        inputCounts[inputKey] = (inputCounts[inputKey] || 0) + 1;
+        userHeatmap[cur.user_id][i] = cur.correct ? 1 : 0;
+
+        return prev;
+      }, []);
+
+      ansIdxByUid.push(curAnsIdxByUid);
+
+      return {
+        ...q,
+        analytics: {
+          time_taken: timeTaken,
+          answers: Object.entries(inputs).reduce((prev, cur) => {
+            prev[cur[1]] = inputCounts[cur[0]];
+            return prev;
+          }, {}),
+        }
+      }
+    });
+
+    const performance = await Promise.all(Object.entries(userHeatmap).map(async ([uid, perf]) => {
+      const u = await User.getOneById(uid);
+
+      return [
+        u.firstname + " " + u.surnames,
+        perf
+      ]
+    }));
+
+    return {
+      questions,
+      accepted_invites: invites.length,
+      started_invites: started.length,
+      performance
+    }
   }
 }
 

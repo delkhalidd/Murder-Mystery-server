@@ -115,6 +115,18 @@ const getTransformationStatus = async (req, res) => {
   return res.status(status.status === "ERRORED" ? 500 : 200).json(status);
 }
 
+const getAnalytics = async (req, res) => {
+  if(!canEditCase(req, res)) return;
+  try{
+    return res.json(await req.case.analytics());
+  }catch(e){
+    throw e;
+    return res.status(500).json({
+      message: e.message
+    });
+  }
+}
+
 const edit = async (req, res) => {
   if(!canEditCase(req, res)) return;
   try{
@@ -130,6 +142,7 @@ const edit = async (req, res) => {
 const deleteCase = async (req, res) => {
   if(!canEditCase(req, res)) return;
   try{
+    await Answer.destroyByCase(req.case.id);
     await Question.destroyByCase(req.case.id);
     await TeacherInput.destroyByCase(req.case.id);
     await Brief.destroyByCase(req.case.id);
@@ -453,5 +466,7 @@ module.exports = {
   getQuestions, getTransformationStatus, createQuestions,
   modifyQuestions, modifyBriefs,
   getByInvite, acceptInvite, startCase,
-  getMine, createAnswers
+  getMine,
+  createAnswers,
+  getAnalytics,
 }
