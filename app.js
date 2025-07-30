@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const api = require("./router/api");
+const views = require("./views");
 const cookieParser = require('cookie-parser')
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api", api);
+app.use("/", views);
 
 app.use((req, res) => {
   res.status(404).end();
