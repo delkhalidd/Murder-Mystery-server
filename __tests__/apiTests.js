@@ -73,6 +73,7 @@ describe("case routes",  () => {
     }
   });
 
+
   beforeAll(async ()=>{
     c = await request(app)
       .post("/api/case")
@@ -166,6 +167,8 @@ describe("case routes",  () => {
     });
   });
 
+  let q;
+
   describe("question and brief generation", () => {
     test("teacher can begin generation task", async () => {
       const response = await request(app)
@@ -207,6 +210,7 @@ describe("case routes",  () => {
       expect(taskResult.status).toBe("COMPLETED");
       expect(Array.isArray(taskResult.result.questions)).toBe(true);
       expect(Array.isArray(taskResult.result.briefs)).toBe(true);
+      q = taskResult.result.questions;
     });
 
     test("generated questions are available", async () => {
@@ -253,6 +257,68 @@ describe("case routes",  () => {
         expect(q.original).toBeDefined();
       }
     });
+  });
+
+  describe("answering questions", () => {
+
+    /* test("student can retrieve list of questions", async () => {
+      const questionList = await request(app)
+        .get(`/api/case/${c.id}/questions`)
+        .set("Authorization", suJWT)
+        .then(r => r.body);
+
+      expect(questionList.length).toBeGreaterThan(0);
+    }); */
+
+    /* beforeAll(async () => {
+      const questionList = await request(app)
+        .get(`/api/case/${c.id}/questions`)
+        .set("Authorization", suJWT)
+        .then(r => r.body);
+
+      expect(questionList.length).toBeGreaterThan(0);
+    }); */
+
+    const createAnswerBody = {
+      answer: "test2"
+    }
+
+    test("student can submit answer to question", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[0].id}`)
+        .send(createAnswerBody)
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(201);
+      expect(response.body.correct).toBeDefined();
+      expect(response.body.answer).toBe(createAnswerBody.answer);
+    });
+
+    test("student cannot answer same question twice", async () => {
+      
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[0].id}`)
+        .send(createAnswerBody)
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
+
+        expect(response.statusCode).toBe(409);
+    });
+
+    test("student can't answer question unless logged in", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[0].id}`)
+        .send(createAnswerBody)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(401)
+      expect(response.body.message).toBe("Unauthorized");
+    })
+
+    test("Student must submit an answer", async () => {
+
+    })
   });
 
   describe("case modification", () => {

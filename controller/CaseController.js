@@ -223,7 +223,7 @@ const createAnswers = async (req, res) => {
 
   if (!req.body || !req.body.answer) {
     return res.status(400).json({
-      message: "Missing answwer in request body"
+      message: "Missing answer in request body"
     });
   }
 
