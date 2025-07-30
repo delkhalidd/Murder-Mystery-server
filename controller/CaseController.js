@@ -7,7 +7,6 @@ const {transformQuestionsAndGetBriefs} = require("../openai");
 const {AccountTypeTeacher, AccountTypeStudent} = require("../database/const");
 const Invite = require("../model/Invite");
 const transformationStatusMap = new Map();
-const { AccountTypeStudent } = require("../database/const");
 
 
 const get = async (req, res) => {
