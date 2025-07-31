@@ -261,26 +261,12 @@ describe("case routes",  () => {
 
   describe("answering questions", () => {
 
-    /* test("student can retrieve list of questions", async () => {
-      const questionList = await request(app)
-        .get(`/api/case/${c.id}/questions`)
-        .set("Authorization", suJWT)
-        .then(r => r.body);
-
-      expect(questionList.length).toBeGreaterThan(0);
-    }); */
-
-    /* beforeAll(async () => {
-      const questionList = await request(app)
-        .get(`/api/case/${c.id}/questions`)
-        .set("Authorization", suJWT)
-        .then(r => r.body);
-
-      expect(questionList.length).toBeGreaterThan(0);
-    }); */
-
     const createAnswerBody = {
-      answer: "test2"
+      answer: "test1"
+    }
+
+    const createAnswerBody2 = {
+      answer: 'test2'
     }
 
     test("student can submit answer to question", async () => {
@@ -317,8 +303,26 @@ describe("case routes",  () => {
     })
 
     test("Student must submit an answer", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[0].id}`)
+        .send()
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
 
-    })
+      expect(response.statusCode).toBe(400)
+      expect(response.body.message).toBe("Missing answer in request body");
+    });
+
+    test("Student must answer questions in order", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[1].id}`)
+        .send(createAnswerBody2)
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.message).toBe("You must answer the previous question first")
+    });
   });
 
   describe("case modification", () => {
