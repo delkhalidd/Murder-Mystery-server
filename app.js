@@ -6,8 +6,11 @@ const views = require("./views");
 const cookieParser = require('cookie-parser')
 
 const app = express();
+
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000', 'https://aims-bags-sen-insider.trycloudflare.com/'],
+  origin: (o, callback)=>{
+    return callback(null, o && (['http://localhost:3001', 'http://localhost:3000', ].includes(o) || o.endsWith("trycloudflare.com")))
+  },
   credentials: true,
 }));
 app.use(cookieParser());
