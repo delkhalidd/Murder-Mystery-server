@@ -42,3 +42,6 @@ $ npm start
 ```
 
 And a server should be available at http://localhost:3000!
+
+## API Documentation
+API documentation is available [on Postman](https://documenter.getpostman.com/view/33650941/2sB3BAKXNU).
