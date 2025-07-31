@@ -45,6 +45,11 @@ services:
       - murder-mystery-data:/postgres-data
 #    ports:
 #      - "${DB_PORT:-5432}:5432" # only uncomment for dev
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: "tunnel --url=http://mystery_api:3000"
+    restart: unless-stopped
+    container_name: cloudflare-tunnel
 
 volumes:
   murder-mystery-data:
