@@ -167,6 +167,27 @@ describe("case routes",  () => {
     });
   });
 
+  describe("case modification", () => {
+    test("only teacher can edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .send(createCaseBody)
+        .set("Authorization", tuJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.title).toBe("test1")
+    });
+
+    test("student can't edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .set("Authorization", suJWT);
+
+      expect(response.statusCode).toBe(403)
+    })
+  });
+
   let q;
 
   describe("question and brief generation", () => {
