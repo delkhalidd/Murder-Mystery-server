@@ -71,7 +71,8 @@ describe("case routes",  () => {
       body: q.question,
       answer: q.answer
     }
-  });
+  })
+  ;
 
 
   beforeAll(async ()=>{
@@ -167,6 +168,27 @@ describe("case routes",  () => {
     });
   });
 
+  describe("case modification", () => {
+    test("Teacher can edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .send(createCaseBody)
+        .set("Authorization", tuJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.title).toBe("test1")
+    });
+
+    test("student can't edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .set("Authorization", suJWT);
+
+      expect(response.statusCode).toBe(403)
+    });
+  });
+
   let q;
 
   describe("question and brief generation", () => {
@@ -256,31 +278,51 @@ describe("case routes",  () => {
         expect(q.answer).toBeDefined();
         expect(q.original).toBeDefined();
       }
+      c.questions = response.questions;
     });
   });
 
+  describe("question modification", () => {
+
+    const editQuestionBody = {
+      body: "test1",
+      answer: "test2"
+    }
+
+    test("Teacher can modify question", async () => {
+      const response = await request(app)
+      .patch(`/api/case/${c.id}/questions`)
+      .send(c.questions.map(q=>{
+        q.body = "jskhdbf";
+        return q;
+      }))
+      .set("Authorization", tuJWT)
+      .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(200)
+    })
+
+  })
+
+
+    test("Teacher can edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .send(createCaseBody)
+        .set("Authorization", tuJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.title).toBe("test1")
+    });
+
   describe("answering questions", () => {
 
-    /* test("student can retrieve list of questions", async () => {
-      const questionList = await request(app)
-        .get(`/api/case/${c.id}/questions`)
-        .set("Authorization", suJWT)
-        .then(r => r.body);
-
-      expect(questionList.length).toBeGreaterThan(0);
-    }); */
-
-    /* beforeAll(async () => {
-      const questionList = await request(app)
-        .get(`/api/case/${c.id}/questions`)
-        .set("Authorization", suJWT)
-        .then(r => r.body);
-
-      expect(questionList.length).toBeGreaterThan(0);
-    }); */
-
     const createAnswerBody = {
-      answer: "test2"
+      answer: "test1"
+    }
+    const createAnswerBody2 = {
+      answer: 'test2'
     }
 
     test("student can submit answer to question", async () => {
@@ -296,7 +338,7 @@ describe("case routes",  () => {
     });
 
     test("student cannot answer same question twice", async () => {
-      
+
       const response = await request(app)
         .post(`/api/case/${c.id}/questions/${q[0].id}`)
         .send(createAnswerBody)
@@ -317,8 +359,36 @@ describe("case routes",  () => {
     })
 
     test("Student must submit an answer", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[0].id}`)
+        .send()
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
 
-    })
+      expect(response.statusCode).toBe(400)
+      expect(response.body.message).toBe("Missing answer in request body");
+    });
+
+    test("Student must answer questions in order", async () => {
+      const response = await request(app)
+        .post(`/api/case/${c.id}/questions/${q[2].id}`)
+        .send(createAnswerBody2)
+        .set("Authorization", suJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.message).toBe("You must answer the previous question first")
+    });
+  });
+
+  describe("case analytics", () => {
+    test("teacher can access analytics", async () => {
+      const response = await request(app)
+        .get(`/api/case/${c.id}/analytics`)
+        .set("Authorization", tuJWT);
+
+      expect(response.statusCode).toBe(200);
+    });
   });
 
   describe("case modification", () => {
