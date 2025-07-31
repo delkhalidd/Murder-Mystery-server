@@ -1,0 +1,6 @@
+coverage
+.idea
+.git
+__tests__
+node_modules
+.env
