@@ -81,6 +81,14 @@ const transformQuestionsAndGetBriefs = async (questions) => {
       if(o.type !== "function_call") return;
       const parsed = JSON.parse(o.arguments);
       switch(o.name){
+        case "search_wikipedia":
+          const article = await searchWikipedia(parsed.title);
+          return {
+            type: "function_call_output",
+            call_id: o.call_id,
+            output: article || "NO CONTENT",
+            callIndex: i,
+          }
         case "submit_response":
           return {
             type: "response",
@@ -97,14 +105,6 @@ const transformQuestionsAndGetBriefs = async (questions) => {
               }
             })]
           };
-        case "search_wikipedia":
-          const article = await searchWikipedia(parsed.title);
-          return {
-            type: "function_call_output",
-            call_id: o.call_id,
-            output: article || "NO CONTENT",
-            callIndex: i,
-          }
       }
     }))
     for(const r of toolResponses){
