@@ -278,6 +278,7 @@ describe("case routes",  () => {
         expect(q.answer).toBeDefined();
         expect(q.original).toBeDefined();
       }
+      c.questions = response.questions;
     });
   });
 
@@ -290,12 +291,15 @@ describe("case routes",  () => {
 
     test("Teacher can modify question", async () => {
       const response = await request(app)
-      .patch(`/api/case/${c.id}`)
-      .send(createQuestionsBody)
+      .patch(`/api/case/${c.id}/questions`)
+      .send(c.questions.map(q=>{
+        q.body = "jskhdbf";
+        return q;
+      }))
       .set("Authorization", tuJWT)
       .set("Content-Type", "application/json");
 
-    expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(200)
     })
 
   })
@@ -334,7 +338,7 @@ describe("case routes",  () => {
     });
 
     test("student cannot answer same question twice", async () => {
-      
+
       const response = await request(app)
         .post(`/api/case/${c.id}/questions/${q[0].id}`)
         .send(createAnswerBody)
@@ -367,7 +371,7 @@ describe("case routes",  () => {
 
     test("Student must answer questions in order", async () => {
       const response = await request(app)
-        .post(`/api/case/${c.id}/questions/${q[1].id}`)
+        .post(`/api/case/${c.id}/questions/${q[2].id}`)
         .send(createAnswerBody2)
         .set("Authorization", suJWT)
         .set("Content-Type", "application/json");
