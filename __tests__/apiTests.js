@@ -381,6 +381,16 @@ describe("case routes",  () => {
     });
   });
 
+  describe("case analytics", () => {
+    test("teacher can access analytics", async () => {
+      const response = await request(app)
+        .get(`/api/case/${c.id}/analytics`)
+        .set("Authorization", tuJWT);
+
+      expect(response.statusCode).toBe(200);
+    });
+  });
+
   describe("case modification", () => {
     // TODO: modification tests
   })
