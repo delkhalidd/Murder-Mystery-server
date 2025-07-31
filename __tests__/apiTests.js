@@ -71,7 +71,8 @@ describe("case routes",  () => {
       body: q.question,
       answer: q.answer
     }
-  });
+  })
+  ;
 
 
   beforeAll(async ()=>{
@@ -168,7 +169,7 @@ describe("case routes",  () => {
   });
 
   describe("case modification", () => {
-    test("only teacher can edit case", async () => {
+    test("Teacher can edit case", async () => {
       const response = await request(app)
         .patch(`/api/case/${c.id}`)
         .send(createCaseBody)
@@ -185,7 +186,7 @@ describe("case routes",  () => {
         .set("Authorization", suJWT);
 
       expect(response.statusCode).toBe(403)
-    })
+    });
   });
 
   let q;
@@ -280,12 +281,42 @@ describe("case routes",  () => {
     });
   });
 
+  describe("question modification", () => {
+
+    const editQuestionBody = {
+      body: "test1",
+      answer: "test2"
+    }
+
+    test("Teacher can modify question", async () => {
+      const response = await request(app)
+      .patch(`/api/case/${c.id}`)
+      .send(createQuestionsBody)
+      .set("Authorization", tuJWT)
+      .set("Content-Type", "application/json");
+
+    expect(response.statusCode).toBe(200)
+    })
+
+  })
+
+
+    test("Teacher can edit case", async () => {
+      const response = await request(app)
+        .patch(`/api/case/${c.id}`)
+        .send(createCaseBody)
+        .set("Authorization", tuJWT)
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(200)
+      expect(response.body.title).toBe("test1")
+    });
+
   describe("answering questions", () => {
 
     const createAnswerBody = {
       answer: "test1"
     }
-
     const createAnswerBody2 = {
       answer: 'test2'
     }
